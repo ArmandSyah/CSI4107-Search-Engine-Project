@@ -5,7 +5,7 @@ from collections import namedtuple
 class PreprocessingBase(ABC):
 
     def __init__(self):
-        self.Document = namedtuple("Document", "doc_id title fulltext format")
+        self.Document = namedtuple("Document", "doc_id title fulltext")
         self.uniform_collections = []
         super().__init__()
 
