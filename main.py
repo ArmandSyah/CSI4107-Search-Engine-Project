@@ -1,6 +1,7 @@
 from preprocessing import UOPreprocessing
 from dictionary import dictionary
 from invertedindex import InvertedIndex
+from booleanretrieval import BooleanRetrieval
 import json
 
 if __name__ == "__main__":
@@ -12,3 +13,7 @@ if __name__ == "__main__":
 
     inverted_index = InvertedIndex.InvertedIndex()
     inverted_index.make_inverted_index()
+
+    b = BooleanRetrieval.BooleanRetrieval()
+    import pprint
+    pprint.pprint(b.infix_to_postfix('printer AND (laser OR ink)'))
