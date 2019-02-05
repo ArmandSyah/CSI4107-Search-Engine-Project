@@ -11,6 +11,7 @@ class Dictionary():
     def __init__(self):
         self.dict = {
             'unaltered': set(),
+            'altered': set(),
             'stopwords_removed': set(),
             'stemmed': set(),
             'normalized': set()
@@ -30,19 +31,23 @@ class Dictionary():
                 self.dict['unaltered'] |= set(tokenized_title)
                 self.dict['unaltered'] |= set(tokenized_fulltext)
 
-                self.dict['stopwords_removed'] |= set(
-                    [w.lower() for w in tokenized_title if not w in self.stop_words])
-                self.dict['stopwords_removed'] |= set(
-                    [w.lower() for w in tokenized_fulltext if not w in self.stop_words])
+                self.dict['altered'] |= normalize(stem(remove_stopwords(
+                    tokenized_title, self.stop_words), self.stemmer))
+                self.dict['altered'] |= normalize(stem(remove_stopwords(
+                    tokenized_fulltext, self.stop_words), self.stemmer))
 
-                self.dict['stemmed'] |= set(
-                    [self.stemmer.stem(w).lower() for w in tokenized_title])
-                self.dict['stemmed'] |= set(
-                    [self.stemmer.stem(w).lower() for w in tokenized_fulltext])
-
-                self.dict['normalized'] |= set(normalize(tokenized_title))
-                self.dict['normalized'] |= set(normalize(tokenized_fulltext))
+        with open('dictionary.json', 'w') as outfile:
+            uo_dict_lists = {k: list(v) for (k, v) in self.dict.items()}
+            json.dump(uo_dict_lists, outfile, ensure_ascii=False, indent=4)
 
 
 def normalize(text):
     return {word.translate(str.maketrans('', '', string.punctuation)).lower() for word in text}
+
+
+def remove_stopwords(text, stop_words):
+    return set([w.lower() for w in text if not w in stop_words])
+
+
+def stem(text, stemmer):
+    return set([stemmer.stem(w).lower() for w in text])

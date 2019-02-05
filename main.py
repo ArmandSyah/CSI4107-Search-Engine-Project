@@ -1,5 +1,6 @@
 from preprocessing import UOPreprocessing
 from dictionary import dictionary
+from invertedindex import InvertedIndex
 import json
 
 if __name__ == "__main__":
@@ -9,6 +10,5 @@ if __name__ == "__main__":
     uo_dict = dictionary.Dictionary()
     uo_dict.make_dictionary()
 
-    with open('dictionary.json', 'w') as outfile:
-        uo_dict_lists = {k: list(v) for (k, v) in uo_dict.dict.items()}
-        json.dump(uo_dict_lists, outfile, ensure_ascii=False, indent=4)
+    inverted_index = InvertedIndex.InvertedIndex()
+    inverted_index.make_inverted_index()
