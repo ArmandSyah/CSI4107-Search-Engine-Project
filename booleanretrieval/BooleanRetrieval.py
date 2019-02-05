@@ -2,10 +2,11 @@ import json
 
 
 class BooleanRetrieval():
-    def __init__(self):
+    def __init__(self, inv_index):
         with open('corpus.json') as corpus:
-            self.corpus = json.load(corpus)
-
+            c = json.load(corpus)
+            self.complete_set = [document['doc_id'] for document in c]
+        self.inverted_index = inv_index
         self.boolean_tokens = ["AND", "OR", "NOT"]
 
     def infix_to_postfix(self, query):
@@ -33,3 +34,21 @@ class BooleanRetrieval():
         while len(opstack) != 0:
             postfix_list.append(opstack.pop())
         return " ".join(postfix_list)
+
+    def postfix_retrieval(self, postfix_query):
+        opstack = []
+        token_list = postfix_query.split()
+        current_set = self.complete_set
+
+        for token in token_list:
+            if token in self.boolean_tokens:
+                op2 = opstack.pop()
+                op1 = opstack.pop()
+                current_set = retrieve(token, op1, op2, current_set)
+                opstack.append(result)
+            else:
+                opstack.append(token)
+
+        return current_set
+
+    def retrieval(self, token, op1, op2, current_set):
