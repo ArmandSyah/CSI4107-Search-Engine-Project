@@ -12,8 +12,8 @@ if __name__ == "__main__":
     uo_dict.make_dictionary()
 
     inverted_index = InvertedIndex.InvertedIndex()
-    inverted_index.make_inverted_index()
+    inv_ind = inverted_index.make_inverted_index()
 
-    b = BooleanRetrieval.BooleanRetrieval()
+    b = BooleanRetrieval.BooleanRetrieval(inv_ind)
     import pprint
-    pprint.pprint(b.infix_to_postfix('printer AND (laser OR ink)'))
+    pprint.pprint(b.retrieve('completed'))

@@ -5,9 +5,13 @@ class BooleanRetrieval():
     def __init__(self, inv_index):
         with open('corpus.json') as corpus:
             c = json.load(corpus)
-            self.complete_set = [document['doc_id'] for document in c]
+            self.complete_set = {document['doc_id'] for document in c}
         self.inverted_index = inv_index
         self.boolean_tokens = ["AND", "OR", "NOT"]
+
+    def retrieve(self, query):
+        query = self.infix_to_postfix(query)
+        return self.postfix_retrieval(query)
 
     def infix_to_postfix(self, query):
         opstack = []
@@ -37,18 +41,51 @@ class BooleanRetrieval():
 
     def postfix_retrieval(self, postfix_query):
         opstack = []
+        querystack = []
         token_list = postfix_query.split()
-        current_set = self.complete_set
 
         for token in token_list:
             if token in self.boolean_tokens:
-                op2 = opstack.pop()
-                op1 = opstack.pop()
-                current_set = retrieve(token, op1, op2, current_set)
-                opstack.append(result)
-            else:
                 opstack.append(token)
+            else:
+                if '*' in token:
+                    permutations = self.check_permutations(token)
+                    print(permutations)
+                    querystack.append(self.postfix_retrieval(
+                        ' OR '.join(permutations)))
+                else:
+                    querystack.append(self.perform_retrieve(token))
 
-        return current_set
+        for operation in opstack:
+            if operation == 'AND':
+                if len(querystack) >= 2:
+                    queries, querystack = querystack[:2], querystack[2:]
+                    operand1, operand2 = queries[0], queries[1]
+                    intersect_between = operand1.intersection(operand2)
+                    querystack.insert(0, intersect_between)
+            elif operation == 'OR':
+                if len(querystack) >= 2:
+                    queries, querystack = querystack[:2], querystack[2:]
+                    operand1, operand2 = queries[0], queries[1]
+                    union_between = operand1.union(operand2)
+                    querystack.insert(0, union_between)
+            elif operation == 'NOT':
+                if len(querystack) >= 1:
+                    query, querystack = querystack[:1], querystack[1:]
+                    difference_between = self.complete_set - query
+                    querystack.insert(0, difference_between)
 
-    def retrieval(self, token, op1, op2, current_set):
+        return querystack.pop()
+
+    def perform_retrieve(self, token):
+        if token in self.inverted_index:
+            appearances = self.inverted_index[token]
+            return {appearance.doc_id for appearance in appearances}
+        return set()
+
+    def check_permutations(self, token):
+        if token.startswith('*'):
+            return [k for k in self.inverted_index.keys() if k.endswith(token[1:])]
+        elif token.endswith('*'):
+            print(self.inverted_index.keys())
+            return [k for k in self.inverted_index.keys() if k.startswith(token[:len(token) - 1])]
