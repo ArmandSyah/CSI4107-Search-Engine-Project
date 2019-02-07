@@ -25,14 +25,11 @@ class Dictionary():
             data = json.load(corpus)
 
             for entry in data:
-                tokenized_title = word_tokenize(entry['title'])
-                tokenized_fulltext = word_tokenize(entry['fulltext'])
+                tokenized_fulltext = [word.lower()
+                                      for word in word_tokenize(entry['fulltext'])]
 
-                self.dict['unaltered'] |= set(tokenized_title)
                 self.dict['unaltered'] |= set(tokenized_fulltext)
 
-                self.dict['altered'] |= normalize(stem(remove_stopwords(
-                    tokenized_title, self.stop_words), self.stemmer))
                 self.dict['altered'] |= normalize(stem(remove_stopwords(
                     tokenized_fulltext, self.stop_words), self.stemmer))
 
