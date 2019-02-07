@@ -2,6 +2,7 @@ from preprocessing import UOPreprocessing
 from dictionary import dictionary
 from invertedindex import InvertedIndex
 from booleanretrieval import BooleanRetrieval
+from corpusacess import CorpusAccess
 import json
 
 if __name__ == "__main__":
@@ -17,3 +18,8 @@ if __name__ == "__main__":
     b = BooleanRetrieval.BooleanRetrieval(inv_ind)
     import pprint
     pprint.pprint(b.retrieve('completed'))
+    inverted_index.make_inverted_index()
+
+    corpus_access = CorpusAccess.CorpusAccess()
+    import pprint
+    pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
