@@ -50,7 +50,6 @@ class BooleanRetrieval():
             else:
                 if '*' in token:
                     permutations = self.check_permutations(token)
-                    print(permutations)
                     querystack.append(self.postfix_retrieval(
                         ' OR '.join(permutations)))
                 else:
@@ -87,5 +86,4 @@ class BooleanRetrieval():
         if token.startswith('*'):
             return [k for k in self.inverted_index.keys() if k.endswith(token[1:])]
         elif token.endswith('*'):
-            print(self.inverted_index.keys())
             return [k for k in self.inverted_index.keys() if k.startswith(token[:len(token) - 1])]
