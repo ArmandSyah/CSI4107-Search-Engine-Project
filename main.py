@@ -3,6 +3,7 @@ from dictionary import dictionary
 from invertedindex import InvertedIndex
 from booleanretrieval import BooleanRetrieval
 from corpusacess import CorpusAccess
+from vectorspacemodel import VectorSpaceModel
 import json
 
 if __name__ == "__main__":
@@ -21,5 +22,7 @@ if __name__ == "__main__":
     inverted_index.make_inverted_index()
 
     corpus_access = CorpusAccess.CorpusAccess()
-    import pprint
     pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
+
+    v = VectorSpaceModel.VectorSpaceModel(inv_ind)
+    pprint.pprint(v.retrieve('programming languages imperative'))

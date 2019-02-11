@@ -24,10 +24,10 @@ class VectorSpaceModel():
     def retrieve(self, query):
         query = lowercase_folding(query)
         tokens = remove_stopwords(word_tokenize(query))
-        query_vector = (1) * len(tokens)
+        query_vector = [1] * len(tokens)
         doc_vectors = compute_doc_vectors(
             self.complete_set, self.tf_idf_matrix, tokens)
-        scores = compute_vector_scores(query_vector, doc_vectors)
+        return compute_vector_scores(query_vector, doc_vectors)
 
 
 def compute_idf(complete_set, inverted_index):
@@ -44,6 +44,7 @@ def compute_tf_idf(complete_set, inverted_index, idf_index):
             placeholder[appearance.doc_id] = appearance.frequency * \
                 idf_index[word]
         tf_idf[word] = placeholder
+
     return tf_idf
 
 
@@ -56,7 +57,16 @@ def compute_doc_vectors(complete_set, tf_idf_matrix, tokens):
             weight = set_of_docweights[doc_id]
             vector.append(weight)
         doc_vectors[doc_id] = vector
+
     return doc_vectors
 
 
-def compute_vector_scores
+def compute_vector_scores(query_vector, doc_vectors):
+    scores = []
+    for doc_id, vector in doc_vectors.items():
+        score = 0
+        for query_vector_weight, doc_tf_idf in zip(query_vector, vector):
+            score += query_vector_weight * doc_tf_idf
+        scores.append((doc_id, score))
+    scores.sort(key=lambda tup: tup[1], reverse=True)
+    return [score for score in scores if score[1] != 0]

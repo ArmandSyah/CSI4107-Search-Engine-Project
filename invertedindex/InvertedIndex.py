@@ -22,9 +22,6 @@ class InvertedIndex():
                     appearance = Appearence(document['doc_id'], count)
                     inv_index[word].append(appearance)
 
-        import pprint
-        pprint.pprint(inv_index)
-
         return inv_index
 
 
