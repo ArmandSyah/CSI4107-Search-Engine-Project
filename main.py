@@ -18,11 +18,11 @@ if __name__ == "__main__":
 
     b = BooleanRetrieval.BooleanRetrieval(inv_ind)
     import pprint
-    pprint.pprint(b.retrieve('completed'))
+    pprint.pprint(b.retrieve('c*s'))
     inverted_index.make_inverted_index()
 
-    corpus_access = CorpusAccess.CorpusAccess()
-    pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
+    # corpus_access = CorpusAccess.CorpusAccess()
+    # pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
 
-    v = VectorSpaceModel.VectorSpaceModel(inv_ind)
-    pprint.pprint(v.retrieve('programming languages imperative'))
+    # v = VectorSpaceModel.VectorSpaceModel(inv_ind)
+    # pprint.pprint(v.retrieve('programming languages imperative'))
