@@ -1,0 +1,4 @@
+{% extends "base.html" %} {% block content %} {% for result in results %}
+<h3>{{ result.title }}</h3>
+<p>{{ result.fulltext }}</p>
+{% endfor %} {% endblock %}

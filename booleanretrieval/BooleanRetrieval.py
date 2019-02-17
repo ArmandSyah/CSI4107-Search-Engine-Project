@@ -1,4 +1,5 @@
 import json
+from utilities import *
 
 
 class BooleanRetrieval():
@@ -10,6 +11,7 @@ class BooleanRetrieval():
         self.boolean_tokens = ["AND", "OR", "NOT"]
 
     def retrieve(self, query):
+        query = lowercase_folding(query)
         query = self.infix_to_postfix(query)
         return self.postfix_retrieval(query)
 
@@ -112,7 +114,7 @@ class BooleanRetrieval():
 
 
 def build_bigram_index(inv_index, token):
-    bigrams = [token[i:i+2] for i in range(1, len(token) - 1, 2)]
+    bigrams = [token[i:i + 2] for i in range(1, len(token) - 1, 2)]
     bigrams.append(token[0])  # first letter
     bigrams.append(token[-1])  # last letter
     bigrams = [''.join(b for b in bigram if b not in '*')
