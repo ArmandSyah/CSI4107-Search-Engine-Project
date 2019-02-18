@@ -9,8 +9,17 @@
         Select your model:
         {% for model in form.models %}
         <tr>
+            <td>{{ model.label }}</td>
         <td>{{ model }}</td>
-        <td>{{ model.label }}</td>
+        </tr>
+        {% endfor %}
+    </p>
+    <p>
+        Select the dictionary mode (will affect your query as well):
+        {% for mode in form.dictionary_modes %}
+        <tr>
+            <td>{{ mode.label }}</td>
+        <td>{{ mode }}</td>
         </tr>
         {% endfor %}
     </p>

@@ -1,4 +1,21 @@
-{% extends "base.html" %} {% block content %} {% for result in results %}
-<h3>{{ result.title }}</h3>
-<p>{{ result.fulltext }}</p>
-{% endfor %} {% endblock %}
+{% extends "base.html" %} {% block content %} {% if model == 'b' %}
+<h2>Boolean Search</h2>
+{% else %}
+<h2>Vector Space Search</h2>
+{% endif %}
+<h2>Query: {{ query }}</h2>
+{% if scores|length == 0 %} {% for result in results %}
+<a href="{{ url_for('get_result', doc_id=result['doc_id'])}}"
+  ><h3>{{ result.title }}</h3></a
+>
+<p>{{ result["excerpt"] }}</p>
+{% endfor %} {% else %} {% for result in zip(results, scores) %}
+<a href="{{ url_for('get_result', doc_id=result[0]['doc_id'])}}">
+  <h3>{{ result[0].title }}</h3></a
+>
+<p>
+  {{ result[0]["excerpt"] }}<br />
+  score: {{ result[1] }}
+</p>
+
+{% endfor %} {% endif %} {% endblock %}

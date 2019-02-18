@@ -1,4 +1,5 @@
 import string
+from nltk import sent_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
@@ -20,3 +21,7 @@ def remove_stopwords(text):
 def stem(text):
     stemmer = PorterStemmer()
     return set([stemmer.stem(w).lower() for w in text])
+
+
+def tokenize_sentence(text):
+    return sent_tokenize(text)

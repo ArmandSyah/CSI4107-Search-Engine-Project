@@ -16,11 +16,6 @@ if __name__ == "__main__":
     inverted_index = InvertedIndex.InvertedIndex()
     inv_ind = inverted_index.make_inverted_index()
 
-    b = BooleanRetrieval.BooleanRetrieval(inv_ind)
-    import pprint
-    pprint.pprint(b.retrieve('c*s'))
-    inverted_index.make_inverted_index()
-
     # corpus_access = CorpusAccess.CorpusAccess()
     # pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
 

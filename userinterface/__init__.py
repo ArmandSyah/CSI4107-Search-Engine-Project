@@ -22,5 +22,6 @@ corpus_access = CorpusAccess.CorpusAccess()
 
 userinterface = Flask(__name__)
 userinterface.config['SECRET_KEY'] = 'key'
+userinterface.add_template_global(name='zip', f=zip)
 
 from userinterface import routes
