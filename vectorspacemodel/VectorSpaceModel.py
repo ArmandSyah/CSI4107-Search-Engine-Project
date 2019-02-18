@@ -16,15 +16,30 @@ class VectorSpaceModel():
             c = json.load(corpus)
             self.complete_set = {document['doc_id'] for document in c}
         self.inverted_index = inv_index
+        self.mode = 'unaltered'
+
+    def retrieve(self, query, mode):
+        query = lowercase_folding(query)
+        self.mode = mode
+
+        if mode == 'fully_altered':
+            query = normalize(stem(remove_stopwords(
+                query)))
+        elif mode == 'normalized':
+            query = normalize(query)
+        elif mode == 'stemmed':
+            query = stem(query)
+        elif mode == 'stopwords_removed':
+            query = remove_stopwords(query)
+
+        tokens = word_tokenize(query)
+        query_vector = [1] * len(tokens)
+
         self.tf_idf_matrix = compute_tf_idf(
             self.complete_set,
-            inv_index,
-            compute_idf(self.complete_set, inv_index))
+            self.inverted_index[self.mode],
+            compute_idf(self.complete_set, self.inverted_index[self.mode]))
 
-    def retrieve(self, query):
-        query = lowercase_folding(query)
-        tokens = remove_stopwords(word_tokenize(query))
-        query_vector = [1] * len(tokens)
         doc_vectors = compute_doc_vectors(
             self.complete_set, self.tf_idf_matrix, tokens)
         return compute_vector_scores(query_vector, doc_vectors)
@@ -32,7 +47,7 @@ class VectorSpaceModel():
 
 def compute_idf(complete_set, inverted_index):
     number_of_docs = len(complete_set)
-    return {word: math.log10(number_of_docs/len(docs))
+    return {word: math.log10(number_of_docs / len(docs))
             for word, docs in inverted_index.items()}
 
 
@@ -40,6 +55,8 @@ def compute_tf_idf(complete_set, inverted_index, idf_index):
     tf_idf = defaultdict(lambda: defaultdict(int))
     for word, docs in inverted_index.items():
         placeholder = defaultdict(int)
+        for doc_id in complete_set:
+            placeholder[doc_id] = 0
         for appearance in docs:
             placeholder[appearance.doc_id] = appearance.frequency * \
                 idf_index[word]
@@ -50,6 +67,7 @@ def compute_tf_idf(complete_set, inverted_index, idf_index):
 
 def compute_doc_vectors(complete_set, tf_idf_matrix, tokens):
     doc_vectors = defaultdict(tuple)
+
     for doc_id in complete_set:
         vector = []
         for token in tokens:

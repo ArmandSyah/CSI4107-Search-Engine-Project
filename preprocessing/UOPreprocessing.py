@@ -2,6 +2,8 @@ from .PreprocessingBase import PreprocessingBase
 from bs4 import BeautifulSoup
 import requests
 import json
+import re
+from utilities import tokenize_sentence
 
 
 class UOPreprocessing(PreprocessingBase):
@@ -23,11 +25,13 @@ class UOPreprocessing(PreprocessingBase):
 
         for index, courseblock in enumerate(courseblocks, 1):
             course_title = courseblock.find(
-                'p', attrs={'class': 'courseblocktitle'})
+                'p', attrs={'class': 'courseblocktitle'}).text
             course_description = courseblock.find(
                 'p', attrs={'class': 'courseblockdesc'})
+            course_excerpt = tokenize_sentence(course_description.text.strip())[
+                0] if course_description is not None else ''
             new_document = self.Document(
-                f'CSI-{index}', course_title.text, course_description.text.strip() if course_description is not None else '')
+                f'CSI-{index}', re.sub('\(.*?\)', '', course_title), course_description.text.strip() if course_description is not None else '', course_excerpt)
             self.uniform_collections.append(new_document)
 
         uniform_dicts = [uniform_collection._asdict()

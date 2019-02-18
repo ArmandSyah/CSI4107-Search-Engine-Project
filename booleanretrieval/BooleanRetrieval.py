@@ -1,4 +1,5 @@
 import json
+from utilities import *
 
 
 class BooleanRetrieval():
@@ -8,8 +9,22 @@ class BooleanRetrieval():
             self.complete_set = {document['doc_id'] for document in c}
         self.inverted_index = inv_index
         self.boolean_tokens = ["AND", "OR", "NOT"]
+        self.mode = 'unaltered'
 
-    def retrieve(self, query):
+    def retrieve(self, query, mode):
+        query = lowercase_folding(query)
+        self.mode = mode
+
+        if mode == 'fully_altered':
+            query = normalize(stem(remove_stopwords(
+                query)))
+        elif mode == 'normalized':
+            query = normalize(query)
+        elif mode == 'stemmed':
+            query = stem(query)
+        elif mode == 'stopwords_removed':
+            query = remove_stopwords(query)
+
         query = self.infix_to_postfix(query)
         return self.postfix_retrieval(query)
 
@@ -78,13 +93,14 @@ class BooleanRetrieval():
         return querystack.pop()
 
     def perform_retrieve(self, token):
-        if token in self.inverted_index:
-            appearances = self.inverted_index[token]
+        if token in self.inverted_index[self.mode]:
+            appearances = self.inverted_index[self.mode][token]
             return {appearance.doc_id for appearance in appearances}
         return set()
 
     def check_permutations(self, token):
-        bigram_index = build_bigram_index(self.inverted_index, token)
+        bigram_index = build_bigram_index(
+            self.inverted_index[self.mode], token)
         permutation_set = set()
         for _, ind_list in bigram_index.items():
             if len(permutation_set) == 0:
@@ -112,16 +128,9 @@ class BooleanRetrieval():
 
 
 def build_bigram_index(inv_index, token):
-    bigrams = [token[i:i+2] for i in range(1, len(token) - 1, 2)]
+    bigrams = [token[i:i + 2] for i in range(1, len(token) - 1, 2)]
     bigrams.append(token[0])  # first letter
     bigrams.append(token[-1])  # last letter
     bigrams = [''.join(b for b in bigram if b not in '*')
                for bigram in bigrams]
-    indices = inv_index.keys()
-    return {bigram: [index for index in indices if bigram in index] for bigram in bigrams}
-
-
-class BigramIndex():
-    def __init__(self, inv_index, token):
-        self.inv_index = inv_index
-        self.token = token
+    return {bigram: [index for index in inv_index.keys() if bigram in index] for bigram in bigrams}
