@@ -5,6 +5,23 @@ from utilities import lowercase_folding
 
 
 class InvertedIndex():
+    """
+        Handles building out the inverted index
+        Loads both the corpus and dictionary json files and builds out the inverted index
+
+        Inverted Index is structured as followed
+
+        Inverted_Index = {
+            'fully_altered': {
+                "example word": [List of Appearance objects],
+                ...
+            }, ...
+        }
+
+        Since there were 5 different modes in the dictionary, the there are 5 different versions of the inverted index built 
+        with the modes in mind (Ex: Inverted index for fully_altered dictionary words, ect.)
+    """
+
     def __init__(self):
         with open('corpus.json') as corpus:
             self.corpus = json.load(corpus)
@@ -22,6 +39,19 @@ class InvertedIndex():
         return inv_index
 
     def fill_inv_index(self, wordlist):
+        """
+            Sets up the inverted index portion for a single dictionary mode
+            Output looks as follows
+
+            {
+                "example word": [List of Appearance objects],
+                ...
+            }
+
+            To count the words in the fulltext and title, used a regex to find every instance of the word, and sum them together
+
+            The counting code was modified from https://stackoverflow.com/questions/17268958/finding-occurrences-of-a-word-in-a-string-in-python-3, from Amber's stack overflow answer
+        """
         inv_index_portion = defaultdict(list)
 
         for word in wordlist:
@@ -36,10 +66,19 @@ class InvertedIndex():
 
 
 def contains_word(fulltext, word):
+    """
+        Regex to find if word is in the fulltext
+
+        This regex was modified from https://stackoverflow.com/questions/5319922/python-check-if-word-is-in-a-string, from Hugh Bothwell's stack overflow answer
+    """
     return re.compile(r'\b({0})\b'.format(re.escape(lowercase_folding(word))), flags=re.IGNORECASE).search(lowercase_folding(fulltext))
 
 
 class Appearence():
+    """
+    Represents a words appearance within the doc
+    """
+
     def __init__(self, doc_id, frequency):
         self.doc_id = doc_id
         self.frequency = frequency

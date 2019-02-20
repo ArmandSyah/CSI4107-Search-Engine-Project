@@ -2,6 +2,11 @@ import json
 
 
 class CorpusAccess():
+    """
+        Simple module that loads corpus json file, takes list of doc_ids and returns list of subsequent documents
+
+    """
+
     def __init__(self):
         with open('corpus.json') as corpus:
             self.corpus = json.load(corpus)

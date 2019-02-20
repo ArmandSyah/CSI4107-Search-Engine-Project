@@ -2,17 +2,38 @@ import json
 from utilities import *
 
 
-class BooleanRetrieval():
+class BooleanRetrievalModel():
+    """
+        Handles the boolean retrieval model for the search engine
+        The optional module, Wildcard Management, has been integrated into this class
+        through the build_bigram_index function, which is called from check_permutation, which builds out
+        every possible word with a wildcard in it (ex: c*s = corpus, cases, ect.)
+
+        To perform the retrieval, first we process the query, changing it from infix to postfix notation,
+        find all permutations of words containing * in them, and then retrieve the doc_ids from the inverted index using the words as keys
+
+        The postfix notation transformation code was modified from http://interactivepython.org/runestone/static/pythonds/BasicDS/InfixPrefixandPostfixExpressions.html
+
+    """
+
     def __init__(self, inv_index):
         with open('corpus.json') as corpus:
             c = json.load(corpus)
             self.complete_set = {document['doc_id'] for document in c}
         self.inverted_index = inv_index
-        self.boolean_tokens = ["AND", "OR", "NOT"]
+        self.boolean_tokens = ["and", "or", "not"]
         self.mode = 'unaltered'
 
     def retrieve(self, query, mode):
-        query = lowercase_folding(query)
+        """
+        The main retrieval method the UI will call
+
+        Does preprocess the query a bit, depending on the mode, which is also passed
+        in from the UI. Afterwards, transforms query from infix to postfix, and then
+        performs the actual retrieval from the inverted index
+        """
+        query = [lowercase_folding(word)
+                 for word in word_tokenize(query) if word not in string.punctuation]
         self.mode = mode
 
         if mode == 'fully_altered':
@@ -31,7 +52,7 @@ class BooleanRetrieval():
     def infix_to_postfix(self, query):
         opstack = []
         postfix_list = []
-        token_list = query.split()
+        token_list = query
 
         for token in token_list:
             if token in self.boolean_tokens:
@@ -65,40 +86,56 @@ class BooleanRetrieval():
             else:
                 if '*' in token:
                     permutations = self.check_permutations(token)
-                    print(permutations)
-                    querystack.append(self.postfix_retrieval(
-                        ' OR '.join(permutations)))
+                    permutations_query = ' or '.join(permutations)
+                    querystack.append(
+                        self.retrieve(permutations_query, self.mode))
                 else:
                     querystack.append(self.perform_retrieve(token))
 
         for operation in opstack:
-            if operation == 'AND':
+            if operation == 'and':
                 if len(querystack) >= 2:
                     queries, querystack = querystack[:2], querystack[2:]
                     operand1, operand2 = queries[0], queries[1]
                     intersect_between = operand1.intersection(operand2)
                     querystack.insert(0, intersect_between)
-            elif operation == 'OR':
+            elif operation == 'or':
                 if len(querystack) >= 2:
                     queries, querystack = querystack[:2], querystack[2:]
                     operand1, operand2 = queries[0], queries[1]
                     union_between = operand1.union(operand2)
                     querystack.insert(0, union_between)
-            elif operation == 'NOT':
+            elif operation == 'not':
                 if len(querystack) >= 1:
                     query, querystack = querystack[:1], querystack[1:]
                     difference_between = self.complete_set - query
                     querystack.insert(0, difference_between)
 
+        while(len(querystack) > 1):
+            queries, querystack = querystack[:2], querystack[2:]
+            operand1, operand2 = queries[0], queries[1]
+            intersect_between = operand1.intersection(operand2)
+            querystack.insert(0, intersect_between)
+
         return querystack.pop()
 
     def perform_retrieve(self, token):
+        """
+        Check if token is in inverted index
+        If yes, return the doc_ids within the inverted index
+        Else, return an empty set
+        """
         if token in self.inverted_index[self.mode]:
             appearances = self.inverted_index[self.mode][token]
-            return {appearance.doc_id for appearance in appearances}
+            return set(appearance.doc_id for appearance in appearances)
         return set()
 
     def check_permutations(self, token):
+        """
+        In the case where token contains a wildcard ('*'), build a bigram index, then return words based
+        on position of wildcard.
+        Handles wildcard regardless of position
+        """
         bigram_index = build_bigram_index(
             self.inverted_index[self.mode], token)
         permutation_set = set()
@@ -108,6 +145,10 @@ class BooleanRetrieval():
             else:
                 permutation_set.intersection(ind_list)
 
+        # Post filter steps
+        # if the token starts with *, then get all words from the permutation set that end with the portion of token after wild card
+        # else if token ends with *, then get all words from the permuation set that start with the portions of token before wild card
+        # else split the token on the * and find words that contain all split portions
         if token.startswith('*'):
             return [k for k in permutation_set if k.endswith(token[1:])]
         elif token.endswith('*'):
@@ -127,10 +168,22 @@ class BooleanRetrieval():
             return permutation_set
 
 
+# Optional Module: Wildcard Management
 def build_bigram_index(inv_index, token):
-    bigrams = [token[i:i + 2] for i in range(1, len(token) - 1, 2)]
+    """
+        Build out the bigram index and return it
+        Structure is as follows:
+
+        {
+            "se": ["sentence","license",...],
+            ...
+        }
+        A dict with string as key, and the values are a list of strings with bigram included
+    """
+    bigrams = [token[i:i + 2] for i in range(1, len(
+        token) - 1, 2)]  # Get all bigrams from the 2nd letter to the 2nd-last letter
     bigrams.append(token[0])  # first letter
     bigrams.append(token[-1])  # last letter
-    bigrams = [''.join(b for b in bigram if b not in '*')
+    bigrams = [''.join(b for b in bigram if b not in '*')  # Filter out any * in the bigrams, as that was causing problems earlier during inverted index search
                for bigram in bigrams]
     return {bigram: [index for index in inv_index.keys() if bigram in index] for bigram in bigrams}

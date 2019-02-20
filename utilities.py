@@ -1,5 +1,5 @@
 import string
-from nltk import sent_tokenize
+from nltk import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 
@@ -25,3 +25,7 @@ def stem(text):
 
 def tokenize_sentence(text):
     return sent_tokenize(text)
+
+
+def tokenize_word(text):
+    return word_tokenize(text)

@@ -8,6 +8,17 @@ from utilities import *
 
 
 class Dictionary():
+    """
+    Builds up dictionary of words from the corpus (corpus.json file)
+    The dictionary contains several modes/options from:
+        - keeping words unaltered
+        - all stopwords removed
+        - stemming each word
+        - normalizing each word
+        - performing all alterations on the word at once
+
+    """
+
     def __init__(self):
         self.dict = {
             'unaltered': set(),
@@ -18,30 +29,37 @@ class Dictionary():
         }
 
     def make_dictionary(self):
+        """
+            Builds out the dictionary and writes it into a json file called Dictionary.json
+
+            The '|=' operator in python is shorthand for intersection of sets
+        """
         with open('corpus.json') as corpus:
             data = json.load(corpus)
 
             for entry in data:
                 tokenized_title = [lowercase_folding(word)
-                                   for word in word_tokenize(entry['title']) if word not in string.punctuation]
+                                   for word in tokenize_word(entry['title']) if word not in string.punctuation]
                 tokenized_fulltext = [lowercase_folding(word)
-                                      for word in word_tokenize(entry['fulltext']) if word not in string.punctuation]
+                                      for word in tokenize_word(entry['fulltext']) if word not in string.punctuation]
 
                 self.dict['unaltered'] |= set(tokenized_title)
                 self.dict['unaltered'] |= set(tokenized_fulltext)
 
-                self.dict['fully_altered'] |= set(tokenized_title)
+                self.dict['fully_altered'] |= normalize(stem(remove_stopwords(
+                    tokenized_title)))
                 self.dict['fully_altered'] |= normalize(stem(remove_stopwords(
                     tokenized_fulltext)))
 
-                self.dict['stopwords_removed'] |= set(tokenized_title)
+                self.dict['stopwords_removed'] |= remove_stopwords(
+                    tokenized_title)
                 self.dict['stopwords_removed'] |= remove_stopwords(
                     tokenized_fulltext)
 
-                self.dict['stemmed'] |= set(tokenized_title)
+                self.dict['stemmed'] |= stem(tokenized_title)
                 self.dict['stemmed'] |= stem(tokenized_fulltext)
 
-                self.dict['normalized'] |= set(tokenized_title)
+                self.dict['normalized'] |= normalize(tokenized_title)
                 self.dict['normalized'] |= normalize(tokenized_fulltext)
 
         with open('dictionary.json', 'w') as outfile:
