@@ -15,9 +15,11 @@ class VectorSpaceModel():
     """
 
     def __init__(self, inv_index):
-        with open('corpus.json') as corpus:
+        with open('corpus.json') as corpus, open('corpus-reuters.json') as corpus_reuters:
             c = json.load(corpus)
+            c_r = json.load(corpus_reuters)
             self.complete_set = {document['doc_id'] for document in c}
+            self.complete_set |= {document['doc_id'] for document in c_r}
         self.inverted_index = inv_index
         self.mode = 'unaltered'
 

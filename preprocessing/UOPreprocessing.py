@@ -48,7 +48,7 @@ class UOPreprocessing(PreprocessingBase):
             course_excerpt = tokenize_sentence(course_description.text.strip())[
                 0] if course_description is not None else ''
             new_document = self.Document(
-                f'CSI-{index}', re.sub('\(.*?\)', '', course_title), course_description.text.strip() if course_description is not None else '', course_excerpt)
+                f'CSI-{index}', re.sub('\(.*?\)', '', course_title), course_description.text.strip() if course_description is not None else '', course_excerpt, "UO Courses")
             self.uniform_collections.append(new_document)
 
         # Since an error will be raised when I try to write the Document NamedTuples to the json file
