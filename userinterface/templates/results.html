@@ -13,14 +13,16 @@
 <a href="{{ url_for('get_result', doc_id=result['doc_id'])}}"
   ><h3>{{ result.title }}</h3></a
 >
-<p>{{ result["excerpt"] }}</p>
+<p>{{ result["excerpt"] }}<br/>
+  topic: {{result["topic"]}}</p>
 {% endfor %} {% else %} {% for result in results %}
 <a href="{{ url_for('get_result', doc_id=result['doc_id'])}}">
   <h3>{{ result.title }}</h3></a
 >
 <p>
   {{ result["excerpt"] }}<br />
-  score: {{ result['score'] }}
+  score: {{ result['score'] }}<br/>
+  topic: {{result["topic"]}}
 </p>
 
 {% endfor %} {% endif %} {% endblock %}

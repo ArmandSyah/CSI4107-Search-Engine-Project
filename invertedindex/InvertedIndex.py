@@ -39,10 +39,9 @@ class InvertedIndex():
         for index, corpus in enumerate([self.corpus, self.corpus_reuters]):
             print(f"reading - corpus #{index}")
             for document in corpus:
-                bag_of_words_unique = set(lowercase_folding(word)
-                                          for word in tokenize_word(document['title']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != "")
-                bag_of_words_unique |= set(lowercase_folding(word)
-                                           for word in tokenize_word(document['fulltext']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != "")
+                bag_of_words_unique = remove_stopwords(
+                    set(lowercase_folding(word)
+                        for word in tokenize_word(document['fulltext']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != ""))
                 for word in bag_of_words_unique:
                     if contains_word(document['fulltext'], word) or contains_word(document['title'], word):
                         count = sum(1 for _ in re.finditer(r'\b%s\b' %
@@ -71,16 +70,22 @@ class InvertedIndex():
         """
         inv_index_portion = defaultdict(list)
 
-        for word in wordlist:
-            for index, corpus in enumerate([self.corpus, self.corpus_reuters]):
-                print(f"reading - corpus #{index}")
-                for document in corpus:
+        for index, corpus in enumerate([self.corpus, self.corpus_reuters]):
+            print(f"reading - corpus #{index}")
+            for document in corpus:
+                bag_of_words_unique = set(lowercase_folding(word)
+                                          for word in tokenize_word(document['title']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != "")
+                bag_of_words_unique |= set(lowercase_folding(word)
+                                           for word in tokenize_word(document['fulltext']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != "")
+                for word in bag_of_words_unique:
                     if contains_word(document['fulltext'], word) or contains_word(document['title'], word):
                         count = sum(1 for _ in re.finditer(r'\b%s\b' %
                                                            re.escape(lowercase_folding(word)), lowercase_folding(document['fulltext']))) + sum(1 for _ in re.finditer(r'\b%s\b' %
                                                                                                                                                                       re.escape(lowercase_folding(word)), lowercase_folding(document['title'])))
                         appearance = Appearence(document['doc_id'], count)
-                        inv_index_portion[word].append(appearance)
+                        inv_index_portion[word].append(
+                            json.dumps(appearance.__dict__))
+
         return inv_index_portion
 
 
@@ -107,3 +112,7 @@ class Appearence():
 
     def __repr__(self):
         return str(self.__dict__)
+
+
+def as_appearence(dct):
+    return Appearence(dct['doc_id'], dct["frequency"])

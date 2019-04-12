@@ -25,12 +25,15 @@ class ReutersPreprocessing(PreprocessingBase):
                         'title') is not None else ""
                     description = article.find('body').text if article.find(
                         'body') is not None else ""
+                    if description == "":
+                        continue
                     excerpt = tokenize_sentence(description.strip())[
                         0] if description is not None and description != "" else ''
-                    topic = article.find('topic').text if article.find(
-                        'topic') is not None else ""
+
+                    topics = article.find('topics').find_all("d")[0].text if article.find(
+                        'topics').find("d") is not None else ""
                     new_document = self.Document(f'{filename}-article #{index}', title, description.strip(
-                    ) if description is not None else '', excerpt, topic)
+                    ) if description is not None else '', excerpt, topics)
                     self.uniform_collections.append(new_document)
 
         uniform_dicts = [uniform_collection._asdict()

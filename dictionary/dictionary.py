@@ -1,10 +1,12 @@
 import json
 import string
 import nltk
-from nltk.corpus import stopwords
+from nltk.corpus import stopwords, words
 from nltk.tokenize import word_tokenize
 from nltk.stem.porter import PorterStemmer
 from utilities import *
+
+wordset = set(words.words())
 
 
 class Dictionary():
@@ -36,15 +38,23 @@ class Dictionary():
             The '|=' operator in python is shorthand for intersection of sets
             That operator was taken from https://python-reference.readthedocs.io/en/latest/docs/sets/op_update.html
         """
-        for index, corpus_file in enumerate(self.corpus_files):
+        for _, corpus_file in enumerate(self.corpus_files):
             with open(corpus_file) as corpus:
                 data = json.load(corpus)
 
                 for entry in data:
                     tokenized_title = [lowercase_folding(word)
-                                       for word in tokenize_word(entry['title']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != ""]
+                                       for word in tokenize_word(entry['title']) if word not in string.punctuation
+                                       and not any(i.isdigit() for i in word)
+                                       and word != ""
+                                       and word in wordset
+                                       and len(word) >= 3]
                     tokenized_fulltext = [lowercase_folding(word)
-                                          for word in tokenize_word(entry['fulltext']) if word not in string.punctuation and not any(i.isdigit() for i in word) and word != ""]
+                                          for word in tokenize_word(entry['fulltext']) if word not in string.punctuation
+                                          and not any(i.isdigit() for i in word)
+                                          and word != ""
+                                          and word in wordset
+                                          and len(word) >= 3]
 
                     self.dict['unaltered'] |= set(tokenized_title)
                     self.dict['unaltered'] |= set(tokenized_fulltext)

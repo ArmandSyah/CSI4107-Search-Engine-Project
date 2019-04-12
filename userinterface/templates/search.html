@@ -5,12 +5,22 @@
 
 
 {% extends "base.html" %} {% block content %}
-<h1>CSI4107 Vanilla Search</h1>
+<h1>CSI4107 Final Search</h1>
 <form action="" method="post" novalidate>
   {{ form.hidden_tag() }}
   <p>
     {{ form.search.label }}<br />
     {{ form.search(size=100) }} <br />
+    <p>
+        Select a Topic:
+        {{ form.topic.label }}
+        {{ form.topic() }}
+    </p>
+    <p>
+        Select a Classification Scheme:
+        {{ form.classification.label }}
+        {{ form.classification() }}
+    </p>
     <p>
         Select your model:
         {% for model in form.models %}
@@ -33,4 +43,8 @@
 
   <p>{{ form.submit() }}</p>
 </form>
+
+
+
 {% endblock %}
+

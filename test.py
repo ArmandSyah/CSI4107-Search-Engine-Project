@@ -6,14 +6,17 @@ from invertedindex import InvertedIndex
 from booleanretrievalmodel import BooleanRetrievalModel
 from corpusacess import CorpusAccess
 from vectorspacemodel import VectorSpaceModel
+from textcategorization import knearestneighbours
 import json
 
 if __name__ == "__main__":
-    proc = ReutersPreprocessing.ReutersPreprocessing()
-    proc.preprocess_collections()
+    # c = knearestneighbours.KNearestNeighboursClassifier()
+    # c.process()
+    # proc = ReutersPreprocessing.ReutersPreprocessing()
+    # proc.preprocess_collections()
 
-    uo_dict = dictionary.Dictionary()
-    uo_dict.make_dictionary()
+    # uo_dict = dictionary.Dictionary()
+    # uo_dict.make_dictionary()
 
     # inverted_index = InvertedIndex.InvertedIndex()
     # inv_ind = inverted_index.make_inverted_index()
@@ -25,5 +28,6 @@ if __name__ == "__main__":
     # # corpus_access = CorpusAccess.CorpusAccess()
     # # pprint.pprint(corpus_access.access(['CSI-1', 'CSI-2']))
 
-    # v = VectorSpaceModel.VectorSpaceModel(inv_ind)
-    # pprint.pprint(v.retrieve('cryptographic security', 'unaltered'))
+    import pprint
+    v = VectorSpaceModel.VectorSpaceModel()
+    v.retrieve('death', 'unaltered')

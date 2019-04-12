@@ -7,21 +7,28 @@ from flask import Flask
 from booleanretrievalmodel import BooleanRetrievalModel
 from corpusacess import CorpusAccess
 from vectorspacemodel import VectorSpaceModel
+from invertedindex import InvertedIndex
+from bigrammodels import BigramModel
+from timeit import default_timer as timer
 
 import click
+import json
 
 userinterface = Flask(__name__)
 userinterface.config['SECRET_KEY'] = 'key'
 userinterface.add_template_global(name='zip', f=zip)
 
+with open('bigram_model.json') as bigram_model:
+    autocomplete_models = json.load(bigram_model)
 
-print("start")
+boolean_search = BooleanRetrievalModel.BooleanRetrievalModel()
 
-
-print("finished inverted index")
-
-boolean_search = BooleanRetrievalModel.BooleanRetrievalModel(inv_ind)
-vector_space_search = VectorSpaceModel.VectorSpaceModel(inv_ind)
+start = timer()
+print("setting up vector space model")
+vector_space_search = VectorSpaceModel.VectorSpaceModel()
+end = timer()
+print("finished setting up vector space model")
+print(f"{end - start} seconds")
 
 corpus_access = CorpusAccess.CorpusAccess()
 

@@ -1,4 +1,5 @@
 import json
+from collections import namedtuple
 from utilities import *
 
 
@@ -16,13 +17,14 @@ class BooleanRetrievalModel():
 
     """
 
-    def __init__(self, inv_index):
+    def __init__(self):
         with open('corpus.json') as corpus, open('corpus-reuters.json') as corpus_reuters:
             c = json.load(corpus)
             c_r = json.load(corpus_reuters)
             self.complete_set = {document['doc_id'] for document in c}
             self.complete_set |= {document['doc_id'] for document in c_r}
-        self.inverted_index = inv_index
+        with open('inverted_index.json') as inv_index:
+            self.inverted_index = json.load(inv_index)
         self.boolean_tokens = ["and", "or", "not"]
         self.mode = 'unaltered'
 
@@ -127,9 +129,14 @@ class BooleanRetrievalModel():
         If yes, return the doc_ids within the inverted index
         Else, return an empty set
         """
-        if token in self.inverted_index[self.mode]:
-            appearances = self.inverted_index[self.mode][token]
-            return set(appearance.doc_id for appearance in appearances)
+        doc_ids = set()
+        if token in self.inverted_index:
+            appearances = self.inverted_index[token]
+            for appearance in appearances:
+                a = json.loads(appearance, object_hook=lambda d: namedtuple(
+                    'X', d.keys())(*d.values()))
+                doc_ids.add(a.doc_id)
+            return doc_ids
         return set()
 
     def check_permutations(self, token):
@@ -139,7 +146,7 @@ class BooleanRetrievalModel():
         Handles wildcard regardless of position
         """
         bigram_index = build_bigram_index(
-            self.inverted_index[self.mode], token)
+            self.inverted_index, token)
         permutation_set = set()
         for _, ind_list in bigram_index.items():
             if len(permutation_set) == 0:
